@@ -1,3 +1,4 @@
+import math
 import cv2
 import numpy as np
 
@@ -10,8 +11,7 @@ while(video.isOpened()):
   #plays and filters for yellow only
   ret, frame = video.read()
   mask = cv2.inRange(frame, low, high)
-  cv2.line(frame, (0, 0), (511, 511), (255, 0, 0), 5)
-  cv2.imshow("original", frame)
+  #cv2.imshow("original", frame)
   
   #blur for better canny effect
   blurred = cv2.GaussianBlur(mask,(7,7),0)
@@ -19,10 +19,25 @@ while(video.isOpened()):
 
   #finds edge of the line
   edges = cv2.Canny(blurred, 50, 150)
+  
+  bluredges = cv2.medianBlur(edges,(7,7),0)
 
-  cv2.imshow('Blended Image', edges)
+  cv2.imshow('Blended Image', bluredges)
+  lines = cv2.HoughLines(bluredges, 1, np.pi, 2)
+  if lines is not None:
+    for i in range(0, len(lines)):
+      rho = lines[i][0][0]
+      theta = lines[i][0][1]
+      a = math.cos(theta)
+      b = math.sin(theta)
+      x0 = a * rho
+      y0 = b * rho
+      pt1 = (int(x0 + 1000*(-b)), int(y0 + 1000*(a)))
+      pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*(a)))
 
-  #kernel = np.ones((5,5),np.uint8)
+      cv2.line(frame, pt1, pt2, (0,0,255), 3, cv2.LINE_AA)
+      cv2.imshow("stuff", frame)
+  
   #erosion = cv2.erode(mask,kernel,iterations = 8)
 
 
