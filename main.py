@@ -20,10 +20,10 @@ while(video.isOpened()):
   #finds edge of the line
   edges = cv2.Canny(blurred, 50, 150)
   
-  bluredges = cv2.medianBlur(edges,(7,7),0)
+  bluredges = cv2.GaussianBlur(edges,(7,7),0)
 
   cv2.imshow('Blended Image', bluredges)
-  lines = cv2.HoughLines(bluredges, 1, np.pi, 2)
+  lines = cv2.HoughLines(bluredges, 1, np.pi/180, 300, None, 0 ,0)
   if lines is not None:
     for i in range(0, len(lines)):
       rho = lines[i][0][0]
