@@ -1,6 +1,7 @@
 import math
 import cv2
 import numpy as np
+from paramiko import SubsystemHandler
 
 high = (110, 255, 255)
 low = (0, 130, 130)
@@ -15,32 +16,46 @@ while(video.isOpened()):
   
   #blur for better canny effect
   blurred = cv2.GaussianBlur(mask,(7,7),0)
-  cv2.imshow('blur', blurred)
+  #cv2.imshow('blur', blurred)
 
   #finds edge of the line
   edges = cv2.Canny(blurred, 50, 150)
   
   bluredges = cv2.GaussianBlur(edges,(7,7),0)
 
-  cv2.imshow('Blended Image', bluredges)
+  #cv2.imshow('Blended Image', bluredges)
     
-  linesP = cv2.HoughLinesP(bluredges, 1, np.pi / 180, 80, 30 , 10)
+  linesP = cv2.HoughLinesP(bluredges, 1, np.pi / 180, 80, 300 , 10)
   if linesP is not None:
-    sumx1 = 0
-    sumy1 = 0
-    sumx2 = 0
-    sumy2 = 0
+    sumh = [0, 0, 0, 0, 0]
+    sumv = [0, 0, 0, 0, 0]
     linesPlen = len(linesP)
     for i in range(0, linesPlen):
       l = linesP[i][0]
-      #cv2.line(frame, (l[0], l[1]), (l[2], l[3]), (0,0,255), 1, cv2.LINE_AA)
-      print(l[0], l[1], l[2], l[3], linesPlen)
-      sumx1 += l[0]
-      sumy1 += l[1]
-      sumx2 += l[2]
-      sumy2 += l[3]
-    
-    cv2.line(frame, (int(sumx1 /linesPlen) , int(sumy1 / linesPlen)), (int(sumx2 / linesPlen),int(sumy2 / linesPlen)), (255, 0 ,0), 2, cv2.LINE_AA) 
+      cv2.line(frame, (l[0], l[1]), (l[2], l[3]), (0,0,255), 1, cv2.LINE_AA)
+      #print(l[0], l[1], l[2], l[3], linesPlen)
+      gradient = (l[3] - l[1]) / (l[2] - l[0]) #find gradient
+      if gradient >= -0.25 and gradient <= 0.25:
+        for i in range(4):
+          sumh[i] += l[i]
+        sumh[4] += 1
+      else:
+        for i in range(4):
+          sumv[i] += l[i]
+        sumv[4] += 1
+      print(linesPlen, sumh[4], sumv[4])
+    if gradient >= -0.25 and gradient <= 0.25:
+      cv2.line(frame, (int(sumh[0] /sumh[4]) , int(sumh[1] / sumh[4])), (int(sumh[2] / sumh[4]),int(sumh[3] / sumh[4])), (255, 0 ,0), 2, cv2.LINE_AA)
+      print(sumh)
+      sumh = [0, 0, 0, 0]
+      
+    else:
+      cv2.line(frame, (int(sumv[0] /sumv[4]) , int(sumv[1] / sumv[4])), (int(sumv[2] / sumv[4]),int(sumv[3] / sumv[4])), (255, 0 ,0), 2, cv2.LINE_AA)
+      print(sumv)
+      sumv = [0, 0, 0, 0]
+      
+        
+    #cv2.line(frame, (int(sumx1 /linesPlen) , int(sumy1 / linesPlen)), (int(sumx2 / linesPlen),int(sumy2 / linesPlen)), (255, 0 ,0), 2, cv2.LINE_AA) 
     #print(meanx, meany)
     
   """lines = cv2.HoughLines(bluredges, 1, np.pi/180, 325, None, 0 ,0)
