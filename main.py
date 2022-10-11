@@ -16,6 +16,7 @@ while(video.isOpened()):
   
   #blur for better canny effect
   blurred = cv2.GaussianBlur(mask,(7,7),0)
+  cv2.imshow("mask", mask)
   #cv2.imshow('blur', blurred)
 
   #finds edge of the line
@@ -25,7 +26,7 @@ while(video.isOpened()):
 
   #cv2.imshow('Blended Image', bluredges)
     
-  linesP = cv2.HoughLinesP(bluredges, 1, np.pi / 180, 80, 300 , 10)
+  """linesP = cv2.HoughLinesP(bluredges, 1, np.pi / 180, 80, 300 , 10)
   if linesP is not None:
     sumh = [0, 0, 0, 0, 0]
     sumv = [0, 0, 0, 0, 0]
@@ -52,13 +53,13 @@ while(video.isOpened()):
     else:
       cv2.line(frame, (int(sumv[0] /sumv[4]) , int(sumv[1] / sumv[4])), (int(sumv[2] / sumv[4]),int(sumv[3] / sumv[4])), (255, 0 ,0), 2, cv2.LINE_AA)
       print(sumv)
-      sumv = [0, 0, 0, 0]
+      sumv = [0, 0, 0, 0]"""
       
         
     #cv2.line(frame, (int(sumx1 /linesPlen) , int(sumy1 / linesPlen)), (int(sumx2 / linesPlen),int(sumy2 / linesPlen)), (255, 0 ,0), 2, cv2.LINE_AA) 
     #print(meanx, meany)
     
-  """lines = cv2.HoughLines(bluredges, 1, np.pi/180, 325, None, 0 ,0)
+  lines = cv2.HoughLines(bluredges, 1, np.pi/180, 325, None, 0 ,0)
   if lines is not None:
     for i in range(0, len(lines)):
       rho = lines[i][0][0]
@@ -72,9 +73,11 @@ while(video.isOpened()):
 
       cv2.line(frame, pt1, pt2, (0,0,255), 3, cv2.LINE_AA)
       cv2.imshow("stuff", frame)
-      print("rho", rho, "   theta", theta)"""
+      print("rho", rho, "   theta", theta)
+      print("a", pt1, "   b", pt2)
 
   cv2.imshow("stuff", frame)
+  
   
   
   
