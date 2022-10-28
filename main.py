@@ -3,6 +3,15 @@ import cv2
 import numpy as np
 from paramiko import SubsystemHandler
 
+def compmean(mean, list, c1, c2, verthorz):
+  for i in range(len(list)):
+    if (mean +20) >= list[i][i] and (mean - 20) <= list[i][i]:
+      list[i].insert(mean, 1)
+    else:
+      templist = []
+      templist += (mean, c1, c2, verthorz)
+      list.append(templist)
+
 high = (110, 255, 255)
 low = (0, 130, 130)
 
@@ -16,7 +25,7 @@ while(video.isOpened()):
   
   #blur for better canny effect
   blurred = cv2.GaussianBlur(mask,(7,7),0)
-  cv2.imshow("mask", mask)
+  #cv2.imshow("mask", mask)
   #cv2.imshow('blur', blurred)
 
   #finds edge of the line
@@ -58,10 +67,11 @@ while(video.isOpened()):
         
     #cv2.line(frame, (int(sumx1 /linesPlen) , int(sumy1 / linesPlen)), (int(sumx2 / linesPlen),int(sumy2 / linesPlen)), (255, 0 ,0), 2, cv2.LINE_AA) 
     #print(meanx, meany)
-    
+  
   lines = cv2.HoughLines(bluredges, 1, np.pi/180, 325, None, 0 ,0)
   if lines is not None:
     for i in range(0, len(lines)):
+      lineslist = [[0]]
       rho = lines[i][0][0]
       theta = lines[i][0][1]
       a = math.cos(theta)
@@ -75,10 +85,33 @@ while(video.isOpened()):
       cv2.imshow("stuff", frame)
       print("rho", rho, "   theta", theta)
       print("a", pt1, "   b", pt2)
+      
+      if pt2[0] - pt1[0] == 0:
+        gradient = 10
+      else:
+        gradient = (pt2[1] - pt1[1]) / (pt2[0] - pt1[0])
+      if gradient > 1 :
+        mean = (pt2[0] + pt1[0]) / 2
+        compmean(mean, lineslist, pt2[1], pt1[1], True) #True is vertical
+      else:
+        mean = (pt2[1] + pt1[1]) / 2
+        compmean(mean, lineslist, pt2[0], pt1[0], False) #False is horizontal
+        
+      
+    for i in range(len(lineslist)-1):
+      meansum = 0
+      for j in range(len(lineslist[i+1]),len(lineslist[i+1]-3)):
+        x=i+1
+        meansum += lineslist[x][j]
 
-  cv2.imshow("stuff", frame)
+      if lineslist[i][-1] is True:
+        cv2.line(frame, (meansum, lineslist[i+1][-3]), (meansum, lineslist[i+1][-2]), (0,255,255), 3, cv2.LINE_AA)
+      else:
+        cv2.line(frame, (lineslist[i+1][-3],meansum), (lineslist[i+1][-2], meansum), (0,255,255), 3, cv2.LINE_AA)
+          
+      
   
-  
+  cv2.imshow("stuff", frame)   
   
   
   #erosion = cv2.erode(mask,kernel,iterations = 8)
@@ -89,8 +122,11 @@ while(video.isOpened()):
   #combined = cv2.addWeighted(edges,0.5,erosion,0.7,0)
   #cv2.line(combined, (0, 0), (511, 511), (0, 0, 255), 5)
 
-
-  if cv2.waitKey(1) & 0xFF == ord('q'):
+  key = cv2.waitKey(1)
+  if key == 32:
+        cv2.waitKey() 
+  if key == ord('q'):
+    cv2.waitKey(1)
     break
 
   
