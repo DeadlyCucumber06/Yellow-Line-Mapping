@@ -3,14 +3,14 @@ import cv2
 import numpy as np
 from paramiko import SubsystemHandler
 
-def compmean(mean, list, c1, c2, verthorz):
+"""def compmean(mean, list, c1, c2, verthorz):
   for i in range(len(list)):
     if (mean +20) >= list[i][i] and (mean - 20) <= list[i][i]:
       list[i].insert(mean, 1)
     else:
       templist = []
       templist += (mean, c1, c2, verthorz)
-      list.append(templist)
+      list.append(templist)"""
 
 high = (110, 255, 255)
 low = (0, 130, 130)
@@ -69,6 +69,10 @@ while(video.isOpened()):
     #print(meanx, meany)
   
   lines = cv2.HoughLines(bluredges, 1, np.pi/180, 325, None, 0 ,0)
+  linesax = []
+  linesay = []
+  linesbx = []
+  linesby = []
   if lines is not None:
     for i in range(0, len(lines)):
       lineslist = [[0]]
@@ -80,36 +84,38 @@ while(video.isOpened()):
       y0 = b * rho
       pt1 = (int(x0 + 1000*(-b)), int(y0 + 1000*(a)))
       pt2 = (int(x0 - 1000*(-b)), int(y0 - 1000*(a)))
+      a = pt1
+      b = pt2
 
       cv2.line(frame, pt1, pt2, (0,0,255), 3, cv2.LINE_AA)
       cv2.imshow("stuff", frame)
-      print("rho", rho, "   theta", theta)
-      print("a", pt1, "   b", pt2)
       
-      if pt2[0] - pt1[0] == 0:
-        gradient = 10
+      #print("rho", rho, "   theta", theta)
+      #print("a", pt1, "   b", pt2)
+      horizontal = []
+      
+      if b[0] - a[0] == 0: #Horizontal
+        gradient = 1
       else:
-        gradient = (pt2[1] - pt1[1]) / (pt2[0] - pt1[0])
+        gradient = (b[1] - a[1]) / (b[0] - a[0])
       if gradient > 1 :
-        mean = (pt2[0] + pt1[0]) / 2
-        compmean(mean, lineslist, pt2[1], pt1[1], True) #True is vertical
+        mean = int((b[0] + a[0]) / 2)
+        compmean(mean, lineslist, b[1], a[1], True) #True is vertical
       else:
-        mean = (pt2[1] + pt1[1]) / 2
-        compmean(mean, lineslist, pt2[0], pt1[0], False) #False is horizontal
+        mean = (b[1] + a[1]) / 2
+        compmean(mean, lineslist, b[0], a[0], False) #False is horizontal
         
       
-    for i in range(len(lineslist)-1):
+    for i in range((len(lineslist))-1):
       meansum = 0
-      for j in range(len(lineslist[i+1]),len(lineslist[i+1]-3)):
-        x=i+1
-        meansum += lineslist[x][j]
+      k = i + 1
+      for j in range(len(lineslist[k]),(len(lineslist[k])-3)):
+        meansum += lineslist[k][j]
 
       if lineslist[i][-1] is True:
-        cv2.line(frame, (meansum, lineslist[i+1][-3]), (meansum, lineslist[i+1][-2]), (0,255,255), 3, cv2.LINE_AA)
+        cv2.line(frame, (meansum, lineslist[k][-3]), (meansum, lineslist[k][-2]), (0,255,255), 3, cv2.LINE_AA)
       else:
-        cv2.line(frame, (lineslist[i+1][-3],meansum), (lineslist[i+1][-2], meansum), (0,255,255), 3, cv2.LINE_AA)
-          
-      
+        cv2.line(frame, (lineslist[k][-3],meansum), (lineslist[k][-2], meansum), (0,255,255), 3, cv2.LINE_AA)"""
   
   cv2.imshow("stuff", frame)   
   
