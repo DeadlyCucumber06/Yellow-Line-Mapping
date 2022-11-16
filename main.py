@@ -42,8 +42,8 @@ while(video.isOpened()):
     #print(meanx, meany)
   
   lines = cv2.HoughLines(bluredges, 1, np.pi/180, 325, None, 0 ,0)
-  vlines = [[[0],[0],[0],[0]]]
-  hlines = [[[0],[0],[0],[0]]]
+  vlines = [[[0],[0]]]
+  hlines = [[[0],[0]]]
   if lines is not None:
     for i in range(0, len(lines)):
       rho = lines[i][0][0]
@@ -66,34 +66,37 @@ while(video.isOpened()):
       #print("a", pt1, "   b", pt2)
       
       m = gradient(pt1,pt2)
-      if m is True:
+      m = gradient(pt1,pt2)
+
+      if m:
+        flag = False
         for i in range(len(vlines)):
           templines = vlines[i][0]
           appendlines = vlines[i]
+          flag = False
           if ax > (templines[0] - 80) and ax < (templines[0]+80):
-            vlines[i][0][0] += (ax)
-            vlines[i][0][2].append(ay)
-            vlines[i][0][1].append(bx)
-            vlines[i][0][3].append(by)
+            vlines[i][0].append(ax)
+            vlines[i][1].append(bx)
+            flag = True
             break
-          else:
-            vlines.append([[ax],[bx],[ay],[by]])
-            break
+          if flag is False:
+            vlines.append([[ax],[bx]])
       else:
+        flag = False
         for i in range(len(hlines)):
           templines = hlines[i][0]
           appendlines = hlines[i]
-          if ay > (templines[1] + 40) and ay < (templines[1]-40):
-            templines.append(ax)
-            appendlines[2].append(ay)
-            appendlines[1].append(bx)
-            appendlines[3].append(by)
+          if ax > (templines[0] - 80) and ax < (templines[0]+80):
+            hlines[i][0][0] += (ax)
+            hlines[i][0][1] += (bx)
+            hlines[i][0][2] += (ay)
+            hlines[i][0][3] += (by)
+            flag = True
             break
-          else:
+          if flag is False:
             hlines.append([[ax],[bx],[ay],[by]])
-            break
       print(vlines)
-      print(hlines)
+      #print(hlines)
       print("")
         
         
