@@ -40,10 +40,48 @@ while(video.isOpened()):
   #cv2.imshow('Blended Image', bluredges) 
     #cv2.line(frame, (int(sumx1 /linesPlen) , int(sumy1 / linesPlen)), (int(sumx2 / linesPlen),int(sumy2 / linesPlen)), (255, 0 ,0), 2, cv2.LINE_AA) 
     #print(meanx, meany)
+    
   
+  frame_copy = frame.copy()
+  
+  kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (3,3))
+  dilate = cv2.dilate(edges, kernel, iterations = 1)
+  contours, hierarchy = cv2.findContours(dilate, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+  cv2.drawContours(frame_copy, contours, -1, (0,255,0), 2)
+  font = cv2.FONT_HERSHEY_COMPLEX
+  for cnt in contours :
+  
+    approx = cv2.approxPolyDP(cnt, 0.009 * cv2.arcLength(cnt, True), True)
+  
+    # draws boundary of contours.
+    cv2.drawContours(frame_copy, [approx], 0, (0, 0, 255), 5) 
+  
+    # Used to flatted the array containing
+    # the co-ordinates of the vertices.
+    n = approx.ravel() 
+    i = 0
+  
+    for j in n :
+        if(i % 2 == 0):
+            x = n[i]
+            y = n[i + 1]
+  
+            # String containing the co-ordinates.
+            string = str(x) + " " + str(y) 
+  
+            if(i == 0):
+                # text on topmost co-ordinate.
+                cv2.putText(frame_copy, "Arrow tip", (x, y),
+                                font, 0.5, (255, 0, 0)) 
+            else:
+                # text on remaining co-ordinates.
+                cv2.putText(frame_copy, string, (x, y), 
+                          frame_copy, 0.5, (0, 255, 0)) 
+        i = i + 1
+  cv2.imshow("contours", frame_copy)
   lines = cv2.HoughLines(bluredges, 1, np.pi/180, 325, None, 0 ,0)
-  vlines = [[[0],[0]]]
-  hlines = [[[0],[0]]]
+  vlines = [[[0],[0],[0],[0]]]
+  hlines = [[[0],[0],[0],[0]]]
   if lines is not None:
     for i in range(0, len(lines)):
       rho = lines[i][0][0]
@@ -59,7 +97,7 @@ while(video.isOpened()):
       bx = pt2[0]
       by = pt2[1]
 
-      ###cv2.line(frame, pt1, pt2, (0,0,255), 3, cv2.LINE_AA)
+      cv2.line(frame, pt1, pt2, (255,0,0), 3, cv2.LINE_AA)
       cv2.imshow("stuff", frame)
       
       #print("rho", rho, "   theta", theta)
@@ -69,34 +107,32 @@ while(video.isOpened()):
 
       if m:
         flag = False
-
         for i in range(len(vlines)):
-          if ax > (vlines[i][0][0] - 80) and ax < (vlines[i][0][0]+80):
+          if ax > (vlines[i][0][0] - 150) and ax < (vlines[i][0][0]+150):
             vlines[i][0].append(ax)
             vlines[i][1].append(bx)
+            vlines[i][2].append(ay)
+            vlines[i][3].append(by)
             flag = True
             break
         if flag is False:
-          vlines.append([[ax],[bx]])
+          vlines.append([[ax],[bx],[ay],[by]])
           
     for j in range(1,len(vlines)):
-      vlinex1 = int(sum(vlines[j][0]) / len(vlines[j][0]))
-      vlinex2 = int(sum(vlines[j][1]) / len(vlines[j][1]))
-      cv2.line(frame, (vlinex1, -1000), (vlinex2, 1000), (0, 0, 255), 5)
+      vlineax = int((sum(vlines[j][0])) / (len(vlines[j][0])))
+      vlinebx = int((sum(vlines[j][1])) / (len(vlines[j][1])))
+      if int(sum(vlines[j][2]) / len(vlines[j][2])) >= 0:
+        vlineay = -1000
+        vlineby = 1000
+      else:
+        vlineay = 1000
+        vlineby = -1000
+      cv2.line(frame, (vlineax, vlineay), (vlineax, vlineby), (0, 0, 255), 3, cv2.LINE_AA)
       #print(hlines)
       #print("")
         
         
   cv2.imshow("stuff", frame)   
-  
-  
-  #erosion = cv2.erode(mask,kernel,iterations = 8)
-
-
-  #cv2.imshow("erode", erosion)
-
-  #combined = cv2.addWeighted(edges,0.5,erosion,0.7,0)
-  #cv2.line(combined, (0, 0), (511, 511), (0, 0, 255), 5)
 
   key = cv2.waitKey(1)
   if key == 32:
