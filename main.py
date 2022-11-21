@@ -59,45 +59,32 @@ while(video.isOpened()):
       bx = pt2[0]
       by = pt2[1]
 
-      cv2.line(frame, pt1, pt2, (0,0,255), 3, cv2.LINE_AA)
+      ###cv2.line(frame, pt1, pt2, (0,0,255), 3, cv2.LINE_AA)
       cv2.imshow("stuff", frame)
       
       #print("rho", rho, "   theta", theta)
       #print("a", pt1, "   b", pt2)
       
       m = gradient(pt1,pt2)
-      m = gradient(pt1,pt2)
 
       if m:
         flag = False
+
         for i in range(len(vlines)):
-          templines = vlines[i][0]
-          appendlines = vlines[i]
-          flag = False
-          if ax > (templines[0] - 80) and ax < (templines[0]+80):
+          if ax > (vlines[i][0][0] - 80) and ax < (vlines[i][0][0]+80):
             vlines[i][0].append(ax)
             vlines[i][1].append(bx)
             flag = True
             break
-          if flag is False:
-            vlines.append([[ax],[bx]])
-      else:
-        flag = False
-        for i in range(len(hlines)):
-          templines = hlines[i][0]
-          appendlines = hlines[i]
-          if ax > (templines[0] - 80) and ax < (templines[0]+80):
-            hlines[i][0][0] += (ax)
-            hlines[i][0][1] += (bx)
-            hlines[i][0][2] += (ay)
-            hlines[i][0][3] += (by)
-            flag = True
-            break
-          if flag is False:
-            hlines.append([[ax],[bx],[ay],[by]])
-      print(vlines)
+        if flag is False:
+          vlines.append([[ax],[bx]])
+          
+    for j in range(1,len(vlines)):
+      vlinex1 = int(sum(vlines[j][0]) / len(vlines[j][0]))
+      vlinex2 = int(sum(vlines[j][1]) / len(vlines[j][1]))
+      cv2.line(frame, (vlinex1, -1000), (vlinex2, 1000), (0, 0, 255), 5)
       #print(hlines)
-      print("")
+      #print("")
         
         
   cv2.imshow("stuff", frame)   
